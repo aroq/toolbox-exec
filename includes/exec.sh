@@ -54,19 +54,15 @@ function toolbox_exec_hook {
 
   for i in ${TOOLBOX_TOOL_DIRS//,/ }
   do
-    _log TRACE "Check if hooks dir exists at path: ${i}/hooks"
+    _log DEBUG "Check if hooks dir exists at path: ${i}/hooks"
     if [[ -d "${i}/hooks" ]]; then
       local _hooks_path="${i}/hooks"
-      _log TRACE "Check if hooks exist: ${_hooks_path}/${_context}/${_hook}"
+      _log DEBUG "Check if hooks exist: ${_hooks_path}/${_context}/${_hook}"
       if [[ -f "${_hooks_path}/${_context}/${_hook}" ]]; then
         _log DEBUG "Execute hook: ${_hooks_path}/${_context}/${_hook} $*"
         (
           _log DEBUG "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
-          if [ "${TOOLBOX_LOG_LEVEL}" = "TRACE" ]; then set -x; fi
-
           . "${_hooks_path}"/"${_context}"/"${_hook}" "$@"
-
-          if [ "${TOOLBOX_LOG_LEVEL}" = "TRACE" ]; then set +x; fi
         )
       fi
 
@@ -76,11 +72,7 @@ function toolbox_exec_hook {
           _log DEBUG "Execute hook: ${f} $*"
           (
             _log DEBUG "$(cat "${f}")"
-            if [ "${TOOLBOX_LOG_LEVEL}" = "TRACE" ]; then set -x; fi
-
             . "${f}" "$@"
-
-            if [ "${TOOLBOX_LOG_LEVEL}" = "TRACE" ]; then set +x; fi
           )
         done
       fi
