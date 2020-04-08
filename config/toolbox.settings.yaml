@@ -1,0 +1,4 @@
+config:
+  toolbox-exec:
+    params:
+      template: toolbox/deps/toolbox-exec/templates/run.tpl
