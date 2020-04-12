@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=SC1090
+
+# Includes
+# https://stackoverflow.com/a/12694189
+SCRIPT_DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$SCRIPT_DIR" ]]; then SCRIPT_DIR="$PWD"; fi
+. "$SCRIPT_DIR/../includes/init.sh"
+. "$SCRIPT_DIR/../includes/util.sh"
+. "$SCRIPT_DIR/../includes/log.sh"
+. "$SCRIPT_DIR/../includes/exec.sh"
+
+CMD=${CMD:-toolbox_exec}
+
+"${CMD}" "$@"

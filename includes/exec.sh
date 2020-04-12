@@ -46,11 +46,21 @@ function toolbox_run {
   "$@"
 }
 
+function toolbox_exec_handler {
+  _log TRACE "Start 'toolbox_exec_handler' function with args: $*"
+  toolbox_exec_hook "toolbox_exec_handler" "before"
+  env | grep ACQUIACLI || true
+  "$@"
+  toolbox_exec_hook "toolbox_exec_handler" "after"
+  _log TRACE "End 'toolbox_exec_handler' function with args: $*"
+}
+
 function toolbox_exec_hook {
   local _context="${1}"
   local _hook="${2}"
 
   TOOLBOX_TOOL_DIRS=${TOOLBOX_TOOL_DIRS:-toolbox}
+  TOOLBOX_EXEC_SUBSHELL=${TOOLBOX_EXEC_SUBSHELL:-true}
 
   for i in ${TOOLBOX_TOOL_DIRS//,/ }
   do
@@ -60,20 +70,28 @@ function toolbox_exec_hook {
       _log DEBUG "Check if hooks exist: ${_hooks_path}/${_context}/${_hook}"
       if [[ -f "${_hooks_path}/${_context}/${_hook}" ]]; then
         _log DEBUG "Execute hook: ${_hooks_path}/${_context}/${_hook} $*"
-        (
-          _log DEBUG "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
+        _log DEBUG "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
+        if [ "${TOOLBOX_EXEC_SUBSHELL}" = true ]; then
+          (
+            . "${_hooks_path}"/"${_context}"/"${_hook}" "$@"
+          )
+        else
           . "${_hooks_path}"/"${_context}"/"${_hook}" "$@"
-        )
+        fi
       fi
 
       if [[ -d "${_hooks_path}/${_context}/${_hook}" ]]; then
         for f in "${_hooks_path}"/"${_context}"/"${_hook}"/*
         do
           _log DEBUG "Execute hook: ${f} $*"
-          (
-            _log DEBUG "$(cat "${f}")"
+          _log DEBUG "$(cat "${f}")"
+          if [ "${TOOLBOX_EXEC_SUBSHELL}" = true ]; then
+            (
             . "${f}" "$@"
-          )
+            )
+          else
+            . "${f}" "$@"
+          fi
         done
       fi
     fi
