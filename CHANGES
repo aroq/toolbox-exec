@@ -1,3 +1,6 @@
+Version 0.1.3:
+ - Remove debug info
+
 Version 0.1.2:
  - Add toolbox_exec_handler
 
