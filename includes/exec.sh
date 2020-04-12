@@ -49,7 +49,6 @@ function toolbox_run {
 function toolbox_exec_handler {
   _log TRACE "Start 'toolbox_exec_handler' function with args: $*"
   toolbox_exec_hook "toolbox_exec_handler" "before"
-  env | grep ACQUIACLI || true
   "$@"
   toolbox_exec_hook "toolbox_exec_handler" "after"
   _log TRACE "End 'toolbox_exec_handler' function with args: $*"
