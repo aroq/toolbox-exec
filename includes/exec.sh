@@ -47,9 +47,15 @@ function toolbox_run {
 }
 
 function toolbox_exec_handler {
+  local _handler
+  _handler="${1}"
   _log TRACE "Start 'toolbox_exec_handler' function with args: $*"
   toolbox_exec_hook "toolbox_exec_handler" "before"
+  toolbox_exec_hook "${_handler}" "before"
+  toolbox_exec_hook "${TOOLBOX_TOOL}" "before"
   "$@"
+  toolbox_exec_hook "${TOOLBOX_TOOL}" "after"
+  toolbox_exec_hook "${_handler}" "after"
   toolbox_exec_hook "toolbox_exec_handler" "after"
   _log TRACE "End 'toolbox_exec_handler' function with args: $*"
 }
@@ -98,7 +104,7 @@ function toolbox_exec_hook {
 }
 
 function toolbox_exec_tool {
-  TOOLBOX_TOOL=${TOOLBOX_TOOL:-${2}}
+  TOOLBOX_TOOL=${TOOLBOX_TOOL:-${1}}
   TOOLBOX_TOOL_PATH=${TOOLBOX_TOOL_PATH:-}
   TOOLBOX_TOOL_DIRS=${TOOLBOX_TOOL_DIRS:-toolbox}
 
@@ -119,11 +125,6 @@ function toolbox_exec_tool {
     exit 1
   fi
 
-  local title
-  title=${1}
-
-  shift
-
-  toolbox_exec "${title}" "${TOOLBOX_TOOL_PATH}" "$@"
+  toolbox_exec "Execute tool: ${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}" "$@"
 }
 
