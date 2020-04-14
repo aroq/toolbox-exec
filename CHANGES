@@ -1,3 +1,6 @@
+Version 0.1.7:
+ - Change DEBUG to TRACE for some log messages
+
 Version 0.1.6:
  - Change DEBUG to TRACE for some log messages
 
