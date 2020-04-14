@@ -75,7 +75,7 @@ function toolbox_exec_hook {
       _log TRACE "Check if hooks exist: ${_hooks_path}/${_context}/${_hook}"
       if [[ -f "${_hooks_path}/${_context}/${_hook}" ]]; then
         _log DEBUG "Execute hook: ${_hooks_path}/${_context}/${_hook} $*"
-        _log DEBUG "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
+        _log TRACE "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
         if [ "${TOOLBOX_EXEC_SUBSHELL}" = true ]; then
           (
             . "${_hooks_path}"/"${_context}"/"${_hook}" "$@"
@@ -89,7 +89,7 @@ function toolbox_exec_hook {
         for f in "${_hooks_path}"/"${_context}"/"${_hook}"/*
         do
           _log DEBUG "Execute hook: ${f} $*"
-          _log DEBUG "$(cat "${f}")"
+          _log TRACE "$(cat "${f}")"
           if [ "${TOOLBOX_EXEC_SUBSHELL}" = true ]; then
             (
             . "${f}" "$@"
