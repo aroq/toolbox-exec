@@ -106,25 +106,33 @@ function toolbox_exec_hook {
 function toolbox_exec_tool {
   TOOLBOX_TOOL=${TOOLBOX_TOOL:-${1}}
   TOOLBOX_TOOL_PATH=${TOOLBOX_TOOL_PATH:-}
-  TOOLBOX_TOOL_DIRS=${TOOLBOX_TOOL_DIRS:-toolbox}
 
-  if [ ! -f "${TOOLBOX_TOOL}" ]; then
-  IFS=" "
-  for i in $(echo "$TOOLBOX_TOOL_DIRS" | sed "s/,/ /g")
-  do
-    _log DEBUG "Check if tool exists at path: ${i}/${TOOLBOX_TOOL}"
-    if [[ -f "${i}/${TOOLBOX_TOOL}" ]]; then
-      TOOLBOX_TOOL_PATH="${i}/${TOOLBOX_TOOL}"
-      break
-    fi
-  done
-  fi
-
+  TOOLBOX_TOOL_PATH=$(toolbox_exec_find_tool "${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}")
   if [[ -z ${TOOLBOX_TOOL_PATH} ]]; then
     _log ERROR "TOOLBOX_TOOL_PATH: ${TOOLBOX_TOOL_PATH} NOT FOUND!"
     exit 1
   fi
 
   toolbox_exec "Execute tool: ${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}" "$@"
+}
+
+function toolbox_exec_find_tool {
+  TOOLBOX_TOOL_DIRS=${TOOLBOX_TOOL_DIRS:-toolbox}
+
+  local _TOOLBOX_TOOL=${1}
+  local _TOOLBOX_TOOL_PATH=${2}
+
+  if [ ! -f "${_TOOLBOX_TOOL}" ]; then
+  IFS=" "
+  for i in $(echo "$TOOLBOX_TOOL_DIRS" | sed "s/,/ /g")
+  do
+    _log DEBUG "Check if tool exists at path: ${i}/${_TOOLBOX_TOOL}"
+    if [[ -f "${i}/${_TOOLBOX_TOOL}" ]]; then
+      _TOOLBOX_TOOL_PATH="${i}/${_TOOLBOX_TOOL}"
+      echo "${_TOOLBOX_TOOL_PATH}"
+      break
+    fi
+  done
+  fi
 }
 
