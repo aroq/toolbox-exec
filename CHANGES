@@ -1,3 +1,6 @@
+Version 0.1.8:
+ - Update exec handling
+
 Version 0.1.7:
  - Change DEBUG to TRACE for some log messages
 
