@@ -2,6 +2,8 @@
 
 # shellcheck disable=SC1090
 
+export TOOLBOX_EXEC_METHOD=${TOOLBOX_EXEC_METHOD:-toolbox_run}
+
 function _toolbox_exec_log() {
   local title
   title=${1:-"Execute command"}
@@ -46,19 +48,43 @@ function toolbox_run {
   "$@"
 }
 
+function toolbox_exec_wrapper {
+  local _handler
+  _handler="${1}"
+  TOOLBOX_EXEC_SUBSHELL=false
+  _log TRACE "Start 'toolbox_exec_wrapper' function with args: $*"
+  toolbox_exec_hook "toolbox_exec_wrapper" "before"
+  toolbox_exec_handler "$@"
+  toolbox_exec_hook "toolbox_exec_wrapper" "after"
+  _log TRACE "End 'toolbox_exec_wrapper' function with args: $*"
+  TOOLBOX_EXEC_SUBSHELL=true
+}
+
 function toolbox_exec_handler {
   local _handler
   _handler="${1}"
   _log TRACE "Start 'toolbox_exec_handler' function with args: $*"
-  toolbox_exec_hook "toolbox_exec_handler" "before"
   toolbox_exec_hook "${_handler}" "before"
   toolbox_exec_hook "${TOOLBOX_TOOL}" "before"
   "$@"
   toolbox_exec_hook "${TOOLBOX_TOOL}" "after"
   toolbox_exec_hook "${_handler}" "after"
-  toolbox_exec_hook "toolbox_exec_handler" "after"
   _log TRACE "End 'toolbox_exec_handler' function with args: $*"
 }
+
+function toolbox_exec_tool {
+  TOOLBOX_TOOL=${TOOLBOX_TOOL:-${1}}
+  TOOLBOX_TOOL_PATH=${TOOLBOX_TOOL_PATH:-}
+
+  TOOLBOX_TOOL_PATH=$(toolbox_exec_find_tool "${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}")
+  if [[ -z ${TOOLBOX_TOOL_PATH} ]]; then
+    _log ERROR "TOOLBOX_TOOL_PATH: ${TOOLBOX_TOOL_PATH} NOT FOUND!"
+    exit 1
+  fi
+
+  "${TOOLBOX_EXEC_METHOD}" "Execute tool: ${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}" "$@"
+}
+
 
 function toolbox_exec_hook {
   local _context="${1}"
@@ -75,7 +101,7 @@ function toolbox_exec_hook {
       _log TRACE "Check if hooks exist: ${_hooks_path}/${_context}/${_hook}"
       if [[ -f "${_hooks_path}/${_context}/${_hook}" ]]; then
         _log DEBUG "Execute hook: ${_hooks_path}/${_context}/${_hook} $*"
-        _log TRACE "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
+        # _log TRACE "$(cat "${_hooks_path}"/"${_context}"/"${_hook}")"
         if [ "${TOOLBOX_EXEC_SUBSHELL}" = true ]; then
           (
             . "${_hooks_path}"/"${_context}"/"${_hook}" "$@"
@@ -89,7 +115,7 @@ function toolbox_exec_hook {
         for f in "${_hooks_path}"/"${_context}"/"${_hook}"/*
         do
           _log DEBUG "Execute hook: ${f} $*"
-          _log TRACE "$(cat "${f}")"
+          # _log TRACE "$(cat "${f}")"
           if [ "${TOOLBOX_EXEC_SUBSHELL}" = true ]; then
             (
             . "${f}" "$@"
@@ -101,19 +127,6 @@ function toolbox_exec_hook {
       fi
     fi
   done
-}
-
-function toolbox_exec_tool {
-  TOOLBOX_TOOL=${TOOLBOX_TOOL:-${1}}
-  TOOLBOX_TOOL_PATH=${TOOLBOX_TOOL_PATH:-}
-
-  TOOLBOX_TOOL_PATH=$(toolbox_exec_find_tool "${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}")
-  if [[ -z ${TOOLBOX_TOOL_PATH} ]]; then
-    _log ERROR "TOOLBOX_TOOL_PATH: ${TOOLBOX_TOOL_PATH} NOT FOUND!"
-    exit 1
-  fi
-
-  toolbox_exec "Execute tool: ${TOOLBOX_TOOL}" "${TOOLBOX_TOOL_PATH}" "$@"
 }
 
 function toolbox_exec_find_tool {
@@ -135,4 +148,3 @@ function toolbox_exec_find_tool {
   done
   fi
 }
-
